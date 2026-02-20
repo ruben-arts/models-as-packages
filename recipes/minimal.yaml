@@ -1,0 +1,26 @@
+package:
+  name: whisper.cpp-model-ggml-tiny-en-q5_1
+  version: 1.0.0
+
+source:
+  url: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin?download=true
+
+build:
+  noarch: generic
+  script:
+      # make sure that the `$PREFIX/bin` directory exists
+      - mkdir -p $PREFIX/share/whisper.cpp/models
+      # move or copy the binary to the `$PREFIX/bin` directory
+      - mv ggml-tiny.en-q5_1.bin $PREFIX/share/whisper.cpp/models/
+
+tests:
+  - package_contents:
+      files:
+          exists:
+          - share/whisper.cpp/models/ggml-tiny.en-q5_1.bin
+
+about:
+  homepage: https://huggingface.co/ggerganov/whisper.cpp/
+  license: MIT
+  summary: A whisper.cpp model in ggml format repackaged as a conda package
+  repository: https://huggingface.co/ggerganov/whisper.cpp/

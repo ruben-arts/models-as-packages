@@ -1,0 +1,19 @@
+model_type:
+  - tiny-q5_1
+  - tiny-q8_0
+  - tiny
+  - tiny.en
+  - tiny.en-q5_1
+  - tiny.en-q8_0
+  - small
+  - small-q5_1
+  - small-q8_0
+  - small.en
+  - small.en-q5_1
+  - small.en-q8_0
+  - medium
+  - medium-q5_0
+  - medium-q8_0
+  - medium.en
+  - medium.en-q5_0
+  - medium.en-q8_0

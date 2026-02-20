@@ -1,0 +1,34 @@
+package:
+  name: whisper.cpp-model-ggml
+  version: 1.0.0
+
+source:
+  url: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${{ model_type }}.bin?download=true
+
+build:
+  noarch: generic
+  number: 0
+  string: ${{ model_type | replace('.', '_') | replace('-', '_') }}
+  script: |
+    # make sure that the `$PREFIX/bin` directory exists
+    mkdir -p $PREFIX/share/whisper.cpp/models
+    # move or copy the binary to the `$PREFIX/bin` directory
+    mv ggml-${{ model_type }}.bin $PREFIX/share/whisper.cpp/models/
+
+    # Add the WHISPER_MODEL_DIR environment variable to point to the model directory
+    mkdir -p "${PREFIX}/etc/conda/env_vars.d"
+    # Echo the json content to a file in the env_vars.d directory
+    echo "{\"WHISPER_MODEL_DIR\": \"\$CONDA_PREFIX/share/whisper.cpp/models\"}" > "${PREFIX}/etc/conda/env_vars.d/${PKG_NAME}.json"
+
+tests:
+  - package_contents:
+      files:
+        exists:
+          - share/whisper.cpp/models/ggml-${{ model_type }}.bin
+  - script: test "$WHISPER_MODEL_DIR" = "$PREFIX/share/whisper.cpp/models"
+
+about:
+  homepage: https://huggingface.co/ggerganov/whisper.cpp/
+  license: MIT
+  summary: A whisper.cpp model in ggml format
+  repository: https://huggingface.co/ggerganov/whisper.cpp/
