@@ -1,10 +1,12 @@
-# Packaging a model as a conda package
+# Packaging an AI/ML model as a conda package
 
-Anything can be a conda package, including static files like models. This blog post will show you a potential way to package and distribute a model. I hope this sparks some ideas from the community on how to properly package these models and what the best practices would be.
+Are you working on LLM distribution, MLOps or just want to have a better way to distribute your models? This blog post is for you.
+
+Anything can be a conda package, including static files like AI/ML models. This blog post will show you a potential way to package and distribute a model. I hope this sparks some ideas from the community on how to properly package these models and what the best practices would be.
 
 I first used this approach of packaging models when I was working on Robotics. We used conda packages to distribute the self trained deep learning models to teams and projects. This approach allowed us to have a single source of everything related to the software running on the machine and it made it easy to track what model was used by the different steps in our development to deployment pipeline.
 
-Conda package come with a few nice features that help you manage your models:
+Conda packages come with a few nice features that help you manage your models:
 
 - Versioning: You can have multiple versions of the same model and easily switch between them.
 - Locking: Because the models are now packaged, you can use the lockfiles to lock down the exact model you want to run. Avoiding mistakes like not correctly downloading the model or using an older version by accident.
@@ -12,12 +14,15 @@ Conda package come with a few nice features that help you manage your models:
 - Channels: A conda channel is a really simple place to store data and make it available for download. You can have a private channel for your organization or use a public one like conda-forge.
 - Caching/Networking: conda packages are already designed to be downloaded and cached. This all can be reused for the models as well. No need to have extra infrastucture or scripts to download the models and cache them.
 - Standardization: Because there are multiple channels that are community managed, there is an opportunity to start one for models, more on that later.
+- Traceability: Using the security features of modern packaging ecosystems like signing and attestations you can have a better traceability of the models and their provenance.
 
 ## How to package a model
 
-In it's simplest form, you just move a file into the prefix and your done.
+In its simplest form, you just move a file into the prefix and you're done.
 
 So let's see how this looks like in a recipe:
+
+`recipe.yaml`:
 
 ```yaml
 package:
@@ -50,21 +55,11 @@ about:
 
 You can build this recipe with:
 
-```
-touch recipe.yaml
-# Move the content above into recipe.yaml
+```bash
 rattler-build build -r recipe.yaml
 ```
 
-And you could install it with:
-
-```
-pixi global install --path output/noarch/whisper.cpp-model-ggml-tiny-en-q5_1-1.0.0-h4616a5c_0.conda
-```
-
-But that obviously didn't give you much as a user, as this file will now be installed into a global environment but you don't know where it is and how to use it.
-
-But now lets look into some ideas to improve the experience.
+Now let's look into some ideas to improve the experience.
 
 ### Using environment variables
 
@@ -93,13 +88,15 @@ This way you can easily find the model through the environment variable.
 After installing the package, you can run the model with:
 
 ```bash
-pixi run whisper-cli -m $WHISPER_MODEL_DIR/ggml-tiny.en-q5_1.bin
+pixi run 'whisper-cli -m $WHISPER_MODEL_DIR/ggml-tiny.en-q5_1.bin'
 ```
+
+> Note that using `$` in `pixi run` run needs to be escaped with `'`(single quotes) before and after the command to avoid your shell trying to expand the variable before it is passed to the Pixi environment.
 
 ### Using build string for variants
 
-The previous example used a single package for a single model, but this would lots of different packages.
-This could become a maintainance issue and it would be hard to keep track of all the different packages and versions.
+The previous example used a single package for a single model, but this would create lots of different packages.
+This could become a maintenance issue and it would be hard to keep track of all the different packages and versions.
 
 An alternative approach would be to use the build string to embed the exact model type and then have a single recipe that can build multiple variants of the model.
 
@@ -163,12 +160,49 @@ rattler-build build -r recipe.yaml -m variants.yaml
 ## File size, networking and caching
 
 These models can be quite large, into the multiple gigabytes, so you want to make sure they are cached and not redownloaded every time.
-Most AI/ML frameworks use the `~/.cache/framework_name` directory to store the models which is an easy to understand.
+Most AI/ML frameworks use the `~/.cache/framework_name` directory to store the models which is easy to understand.
 When using conda packages it will use the normal conda package caching mechanics which is a bit more hidden.
 That said it's not too complex and a proven caching approach, so it's easy to reuse.
 To get the models into the virtual environments the installers will move it in using hardlinks or reflinks, meaning that you don't need to worry about growing disk space.
 
 ![linking](./linking_drawing.png)
+
+## Traceability through attestations and trusted publishers
+
+Supply chain security is more important than ever, traceability is the first step in being able to combat these attacks and make sure you know where your software and models are coming from.
+When combining the model packaging and distribution through [prefix.dev](https://prefix.dev) with [trusted publishers](https://prefix.dev/docs/prefix/channels#publish-using-trusted-publishers), you can ensure the integrity and origin of your own models.
+This will cryptographically sign the package and make sure the contents of the package is exactly what it was when it was built.
+
+![Trusted publishers interface prefix.dev](./trusted_publishers.png)
+
+When you build your own models, you are able to sign them using the `rattler-build publish --generate-attestation`.
+In combination with trusted publishers this allows you to track where the model was built, who(which repository) built it and that the contents of the package is exactly what it was when it was built.
+
+With the current focus on supply chain security and the provenance of software, this is an important aspect to consider when building and distributing models.
+
+It's as simple as running this in your GitHub Actions CI/CD pipeline:
+
+```yaml
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+  
+      - name: Set up rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.19
+
+      - name: Upload all packages
+        shell: bash
+        run: |
+          rattler-build publish ./recipes/variant_recipe.yaml --to https://prefix.dev/proto-model-forge --generate-attestation
+```
+
+More information can be found here: https://rattler-build.prefix.dev/latest/authentication_and_upload
 
 ## Questions
 
@@ -180,15 +214,17 @@ The setup above works but it raises some questions with regards to standardizati
 - What is the best approach to support the workflow where multiple models are used and switched between?
 - Does it make sense to do global installations of these models and let tools find those too?
 
-I welcome the community to start a discussion around these questions in the [conda zulip](https://conda.zulipchat.com/)
+I welcome the community to start a discussion around these questions in the [conda zulip](https://conda.zulipchat.com/) or in the [prefix.dev discord](https://discord.gg/kKV8ZxyzY4) and share your ideas and approaches to packaging models.
 
 ## Example repository
 
-To play around with this, you can check out the example repository I created: XXXX
+To play around with this, you can check out the example repository I created: https://github.com/ruben-arts/models-as-packages. 
 
-It packages one type of model for the [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp) project, feel free to check it out and play around with it.
+It package's one type of model for the [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp) project, feel free to check it out and play around with it.
 You can build the packages with `rattler-build` and install them with `pixi global install --path path_to_package.conda`.
 It also contains a publish command to publish the package to the `prefix.dev` channel, but you can also publish it to your own channel or just keep it locally.
+
+For this blogpost I published some of the packages to the `prefix.dev` channel [`proto-model-forge`](https://prefix.dev/channels/proto-model-forge), so you can also just install them from there.
 
 > Note that prefix.dev has a package size limit of 1GB so if you want to publish larger models contact us to get that limit increased.
 

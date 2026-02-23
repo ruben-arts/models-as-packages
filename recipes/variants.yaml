@@ -11,9 +11,10 @@ model_type:
   - small.en
   - small.en-q5_1
   - small.en-q8_0
-  - medium
-  - medium-q5_0
-  - medium-q8_0
-  - medium.en
-  - medium.en-q5_0
-  - medium.en-q8_0
+  # Commenting out the models that can't be uploaded to a free prefix.dev channel, as of writing this.
+  # - medium
+  # - medium-q5_0
+  # - medium-q8_0
+  # - medium.en
+  # - medium.en-q5_0
+  # - medium.en-q8_0
