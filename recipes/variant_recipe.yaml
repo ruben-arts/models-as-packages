@@ -52,7 +52,7 @@ outputs:
     noarch: generic
     number: ${{ build_number }}
     # Jinja template to trim the `tiny` from `tiny.en` and `tiny-q5_1` and `tiny.en-q8_0`
-    string: ${{ (model_type | replace('.', '-') | split('-'))[1:10] | join('_') }}
+    string: ${{ (model_type | replace('.', '-') | split('-'))[1:10] | join('_') }}_${{ build_number }}
   requirements:
     run:
       - whisper.cpp-model-ggml-${{ model_type }}==${{ version }}
