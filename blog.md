@@ -202,7 +202,9 @@ jobs:
           rattler-build publish ./recipes/variant_recipe.yaml --to https://prefix.dev/proto-model-forge --generate-attestation
 ```
 
-More information can be found here: https://rattler-build.prefix.dev/latest/authentication_and_upload
+More information can be found in the rattler-build [documentation](https://rattler-build.prefix.dev/latest/authentication_and_upload).
+
+Sigstore also has a blogpost on model transparency and provenance that is worth checking out: [Taming the Wild West of ML: Practical Model Signing with Sigstore](https://blog.sigstore.dev/model-transparency-v1.0/).
 
 ## Questions
 
@@ -218,7 +220,7 @@ I welcome the community to start a discussion around these questions in the [con
 
 ## Example repository
 
-To play around with this, you can check out the example repository I created: https://github.com/ruben-arts/models-as-packages. 
+To play around with this, you can check out the [example repository](https://github.com/ruben-arts/models-as-packages).
 
 It package's one type of model for the [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp) project, feel free to check it out and play around with it.
 You can build the packages with `rattler-build` and install them with `pixi global install --path path_to_package.conda`.
@@ -231,7 +233,7 @@ For this blogpost I published some of the packages to the `prefix.dev` channel [
 ## Conclusion
 
 The conda packaging format offers an improved experience compared to downloading single files manually or through scripts.
-It offers features like versioning, locking, dependencies, channels and caching that can be reused for models as well.
+It offers features like versioning, tracebility, reproduciblity, and caching.
 There is lots of potential for the community to start standardizing on how to package models.
 This way it becomes easier to build, share and distribute models.
 
