@@ -6,7 +6,8 @@ context:
   version: 1.0.0
   # 0: Initial versions
   # 1: Build with attestation
-  build_number: 1
+  # 2: Rebuild as we got duplicate files
+  build_number: 2
 
 outputs:
 # The main package output
