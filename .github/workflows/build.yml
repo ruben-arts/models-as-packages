@@ -1,0 +1,20 @@
+name: Build and Publish with attestation
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+  
+      - name: Set up rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.34
+
+      - name: Build and publish packages with attestation
+        shell: bash
+        run: |
+          rattler-build publish ./recipes/variant_recipe.yaml --to https://prefix.dev/proto-model-forge --generate-attestation

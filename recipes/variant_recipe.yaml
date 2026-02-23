@@ -1,7 +1,9 @@
 context:
   name: whisper.cpp-model-ggml-${{ model_type }}
   version: 1.0.0
-  build_number: 0
+  # 0: Initial versions
+  # 1: Build with attestation
+  build_number: 1
 
 recipe:
   name: whisper.cpp-model-ggml
@@ -41,6 +43,7 @@ outputs:
     summary: A whisper.cpp model in ggml format
     repository: https://huggingface.co/ggerganov/whisper.cpp/
 
+# Second output to combine all models into one meta package with build string variants
 - package:
     name: whisper.cpp-model-ggml-${{ model_type | split('.') | first | split('-') | first }}
     version: ${{ version }}
