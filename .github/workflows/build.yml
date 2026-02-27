@@ -20,4 +20,4 @@ jobs:
       - name: Build and publish packages with attestation
         shell: bash
         run: |
-          pixi run publish --generate-attestation
+          pixi run publish --generate-attestation --skip-existing all
