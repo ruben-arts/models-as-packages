@@ -1,28 +1,37 @@
 [workspace]
 channels = ["conda-forge", "https://prefix.dev/proto-model-forge"]
 # To use your locally build packages use this:
-# channels = ["conda-forge", "./output"]
+# channels = ["./output", "conda-forge"]
 platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
 
 [tasks]
 small = "whisper-cli -m $WHISPER_MODEL_DIR/ggml-small*.bin"
 tiny = "whisper-cli -m $WHISPER_MODEL_DIR/ggml-tiny*.bin"
-# medium is to big for a free prefix.dev channel, you can build it locally.
+# # medium is to big for a free prefix.dev channel, you can build it locally.
 # medium = "whisper-cli -m $WHISPER_MODEL_DIR/ggml-medium*.bin"
+
+server = "whisper-server -m $WHISPER_MODEL_DIR/ggml-small*.bin"
+
+[tasks.mic]
+cmd = "whisper-stream -m $WHISPER_MODEL_DIR/ggml-{{ modelsize }}*.bin"
+description = "Run whisper-stream from your microphone"
+args = [
+    { arg = "modelsize", default = "small" },
+]
 
 [dependencies]
 "whisper.cpp" = ">=1.8.3,<2"
 
-"whisper.cpp-model-ggml-small" = "*"
+"whisper.cpp-model-ggml-small.en" = "*"
 "whisper.cpp-model-ggml-tiny.en-q5_1" = "*"
 # "whisper.cpp-model-ggml-medium.en-q8_0" = "*"
 
 [feature.build.dependencies]
-rattler-build = ">=0.57.2,<0.58"
+rattler-build = ">=0.58.0,<0.59"
 
 [feature.build.tasks]
 publish = "rattler-build publish --to https://prefix.dev/proto-model-forge ./recipes/variant_recipe.yaml"
-build = { cmd = "rattler-build build -r {{ recipe }}", args = [{ arg = "recipe", default = "./recipes/variant_recipe.yaml" }]}
+build = { cmd = "rattler-build build -r ./recipes/{{ recipe }}", args = [{ arg = "recipe", default = "variant_recipe.yaml" }]}
 
 [environments]
 default = ["build"]
