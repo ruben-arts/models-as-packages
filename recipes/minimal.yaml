@@ -8,9 +8,9 @@ source:
 build:
   noarch: generic
   script:
-      # make sure that the `$PREFIX/bin` directory exists
+      # make sure that the `$PREFIX/share` directory exists
       - mkdir -p $PREFIX/share/whisper.cpp/models
-      # move or copy the binary to the `$PREFIX/bin` directory
+      # move or copy the binary to the `$PREFIX/share` directory
       - mv ggml-tiny.en-q5_1.bin $PREFIX/share/whisper.cpp/models/
 
 tests:

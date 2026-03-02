@@ -21,9 +21,9 @@ outputs:
     noarch: generic
     number: ${{ build_number }}
     script: |
-      # make sure that the `$PREFIX/bin` directory exists
+      # make sure that the `$PREFIX/share` directory exists
       mkdir -p $PREFIX/share/whisper.cpp/models
-      # move or copy the binary to the `$PREFIX/bin` directory
+      # move or copy the binary to the `$PREFIX/share` directory
       mv ggml-${{ model_type }}.bin $PREFIX/share/whisper.cpp/models/
 
       # Add the WHISPER_MODEL_DIR environment variable to point to the model directory
