@@ -7,7 +7,8 @@ context:
   # 0: Initial versions
   # 1: Build with attestation
   # 2: Rebuild as we got duplicate files
-  build_number: 2
+  # 3: Rebuild to use proper sha256 sums
+  build_number: 3
 
 outputs:
 # The main package output
@@ -16,6 +17,7 @@ outputs:
     version: ${{ version }}
   source:
       url: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${{ model_type }}.bin?download=true
+      sha256: ${{ model_sha_sum }}
 
   build:
     noarch: generic
